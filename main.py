@@ -33,6 +33,11 @@ class Record:
             if num.value == num.value:
                 return self.nums.pop(i)
 
+    def add(self, new_num: Phone):
+        if self.add_record(new_num):
+            self.nums.append(new_num)
+            return new_num
+
 
 class AddressBook(UserDict):
     def add_record(self, record: Record):
@@ -88,8 +93,7 @@ def input_show():
     for k, v in data.items():
         _ = k.title() + ' ' + str(v)
         contacts.append(_)
-        contacts_join = ('\n').join(contacts)
-    return "\n".join([f"{k}: {v} " for k, v in contacts_join.items()])
+    return "\n".join([f"{k}: {v} " for k, v in contacts.items()])
 
 
 COMMANDS = {
@@ -131,3 +135,15 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+ab = AddressBook()
+name = Name("Bill")
+phone = Phone("39887")
+rec = Record(name, phone)
+ab.add_record(rec)
+print(ab)
+phone2 = Phone("12554")
+rec.change_phone(phone, phone2)
+phone3 = Phone("099776")
+rec.add_phone(phone3)
+print(ab)
