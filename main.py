@@ -3,38 +3,37 @@ from collections import UserDict
 
 class Field:
     def __init__(self, value: str) -> None:
-        self.value = value.name()
+        self.value = value
 
 
 class Name(Field):
-    def __init__(self, *args):
-        super().__init__(*args)
+    pass
 
 
 class Phone(Field):
-    def __init__(self, *args):
-        self.items = []
-        super().__init__(*args)
+    pass
 
 
 class Record:
 
-    def __init__(self, name: Name, nums: Phone) -> None:
+    def __init__(self, name: Name, num: Phone = None) -> None:
         self.name = name
-        self.nums = nums
-
-    def edit(self, num: Phone, new_num: Phone):
-        if self.remove_record(num):
+        self.nums = []
+        if num:
+            self.nums.append(num)
+            
+    def add(self, new_num: Phone):
+        if new_num.value not in [p.value for p in self.nums]:
             self.nums.append(new_num)
             return new_num
-
+    
     def remove(self, num: Phone):
-        for i in enumerate(self.nums):
-            if num.value == num.value:
+        for i, p in enumerate(self.nums):
+            if num.value == p.value:
                 return self.nums.pop(i)
-
-    def add(self, new_num: Phone):
-        if self.add_record(new_num):
+        
+    def edit(self, num: Phone, new_num: Phone):
+        if self.remove(num):
             self.nums.append(new_num)
             return new_num
 
@@ -73,27 +72,35 @@ data = {}
 
 contacts = {}
 
+ab = AddressBook()
+
 @input_error
 def input_add(*args):
-    data.update({args[0]: args[1]})
+    name = Name(args[0])
+    phone = Phone(args[1])
+    rec = Record(name, phone)
+    ab.add_record(rec)
     return f"Contact {args[0].title()} added"
 
 
 @input_error
 def input_change(*args):
-    data[args[0]] = args[1]
+    rec = ab.get(args[0])
+    if rec:
+        phone = Phone(args[1])
+        new_phone = Phone(args[2])
+        rec.edit(phone, new_phone)
     return f"Contact {args[0].title()} changed"
 
 
 @input_error
 def input_phone(*args):
-    return data[args[0]]
+    rec = ab.get(args[0])
+    if rec:
+        return rec.phones()
 
 def input_show():
-    for k, v in data.items():
-        _ = k.title() + ' ' + str(v)
-        contacts.append(_)
-    return "\n".join([f"{k}: {v} " for k, v in contacts.items()])
+    return "\n".join([f"{v.name.value}: {v.nums} " for v in ab.values()])
 
 
 COMMANDS = {
@@ -110,40 +117,14 @@ COMMANDS = {
 def main():
     while True:
         user_input = input(">>> ")
+        if user_input == '.':
+            break
         for k, v in COMMANDS.items():
-            if v == user_input:
-                print(k())
-            if user_input == '.':
-                break
-            user_input = user_input.lower()
-            if user_input in ['good bye', 'exit', 'close']:
-                False
-            cmd = user_input
-            if cmd[0] == 'add':
-                contacts.extend(cmd)
-                print(input_add())
-                contacts.clear()
-            if cmd[0] == 'change':
-                contacts.extend(cmd)
-                print(input_change())
-                contacts.clear()
-            if cmd[0] == 'phone':
-                contacts.extend(cmd)
-                print(input_phone(), end='\n')
-                contacts.clear()
+            if user_input.startswith(v):
+                cmd, data = k, user_input[len(v):].strip().split() 
+        print(cmd(*data))    
 
 
 if __name__ == "__main__":
     main()
-
-ab = AddressBook()
-name = Name("Bill")
-phone = Phone("39887")
-rec = Record(name, phone)
-ab.add_record(rec)
-print(ab)
-phone2 = Phone("12554")
-rec.change_phone(phone, phone2)
-phone3 = Phone("099776")
-rec.add_phone(phone3)
-print(ab)
+  
